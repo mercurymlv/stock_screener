@@ -1,19 +1,8 @@
+/* =========================
+   Base / Reset
+========================= */
 * {
   box-sizing: border-box;
-}
-
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-/* allow brand and nav to be on same line */
-.site-header .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
 }
 
 body {
@@ -23,12 +12,26 @@ body {
   color: #222;
 }
 
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
 
-/* Header */
+/* =========================
+   Header / Branding
+========================= */
 .site-header {
   background: #ffffff;
   border-bottom: 1px solid #ddd;
   padding: 16px 0;
+}
+
+.site-header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .brand {
@@ -59,9 +62,18 @@ body {
   color: #666;
 }
 
-/* Nav */
+/* =========================
+   Navigation
+========================= */
+#nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
 .nav {
-  margin-top: 12px;
   display: flex;
   gap: 16px;
 }
@@ -76,12 +88,37 @@ body {
   text-decoration: underline;
 }
 
-/* Content */
+/* =========================
+   Content
+========================= */
 .content {
   padding: 24px;
 }
 
-/* Footer */
+/* =========================
+   Tables
+========================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
+
+/* =========================
+   Footer
+========================= */
 .site-footer {
   background: #ffffff;
   border-top: 1px solid #ddd;
@@ -91,21 +128,35 @@ body {
   text-align: center;
 }
 
-/* main content display table styles */
+/* =========================
+   Mobile Navigation
+========================= */
+@media (max-width: 768px) {
+  #nav-toggle {
+    display: block;
+  }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 16px;
-}
+  .nav {
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    margin-top: 12px;
+  }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
+  .nav.active {
+    max-height: 500px; /* big enough to show all links */
+    opacity: 1;
+  }
 
-th {
-  background-color: #f0f0f0;
-  font-weight: 600;
+  .nav a {
+    margin: 8px 0;
+  }
+
+  .brand {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
