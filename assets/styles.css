@@ -160,3 +160,64 @@ th {
     justify-content: space-between;
   }
 }
+
+
+/* Home page formatting */
+.signals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .signals-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.signals h2 {
+    margin-bottom: 0.5rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th, td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    text-align: left;
+    font-weight: 600;
+}
+
+th.num,
+td.num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Signal strength */
+.signal-strong-buy {
+    color: #1a7f37;
+    font-weight: 600;
+}
+
+.signal-strong-sell {
+    color: #b42318;
+    font-weight: 600;
+}
+
+/* Links */
+td a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+td a:hover {
+    text-decoration: underline;
+}

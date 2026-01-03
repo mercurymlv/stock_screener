@@ -8,44 +8,155 @@ require_once __DIR__ . '/includes/db_connect.php';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<h1>Overview</h1>
+<!-- Start Singnals -->
+<!-- // Z-score - both buy and sell potential -->
+
 <?php
+$indicator = 'z_score_20';
 
-// Choose a watchlist to display (example: watch_list_id = 1)
-$watchlist_id = 1;
+$sqlBuy = "
+    SELECT
+        ls.symbol,
+        ls.value AS z_score,
+        ls.as_of_date,
+        GROUP_CONCAT(
+          CONCAT(
+            '<a href=''watchlists.php?id=',
+            w.watch_list_id,
+            '''>',
+            w.name,
+            '</a>'
+          )
+          ORDER BY w.name
+          SEPARATOR ', '
+        ) AS watchlists_html
+    FROM latest_signals_v ls
+    LEFT JOIN watchlist_items wi
+      ON wi.symbol = ls.symbol
+    LEFT JOIN watchlists w
+      ON w.watch_list_id = wi.watch_list_id
+    WHERE ls.indicator = :indicator
+    GROUP BY
+        ls.symbol,
+        ls.value,
+        ls.as_of_date
+    ORDER BY ls.value ASC
+    LIMIT 10;
+";
 
-// Fetch watchlist items
-$stmt = $pdo->prepare("
-    SELECT symbol, notes, created_at
-    FROM watchlist_items
-    WHERE watch_list_id = ?
-    ORDER BY symbol
-");
-$stmt->execute([$watchlist_id]);
-$items = $stmt->fetchAll();
+$sqlSell = "
+    SELECT
+        ls.symbol,
+        ls.value AS z_score,
+        ls.as_of_date,
+        GROUP_CONCAT(
+          CONCAT(
+            '<a href=''watchlists.php?id=',
+            w.watch_list_id,
+            '''>',
+            w.name,
+            '</a>'
+          )
+          ORDER BY w.name
+          SEPARATOR ', '
+        ) AS watchlists_html
+    FROM latest_signals_v ls
+    LEFT JOIN watchlist_items wi
+      ON wi.symbol = ls.symbol
+    LEFT JOIN watchlists w
+      ON w.watch_list_id = wi.watch_list_id
+    WHERE ls.indicator = :indicator
+    GROUP BY
+        ls.symbol,
+        ls.value,
+        ls.as_of_date
+    ORDER BY ls.value DESC
+    LIMIT 10;
+";
+
+$stmtBuy  = $pdo->prepare($sqlBuy);
+$stmtSell = $pdo->prepare($sqlSell);
+
+$stmtBuy->execute(['indicator' => $indicator]);
+$stmtSell->execute(['indicator' => $indicator]);
+
+$buyRows  = $stmtBuy->fetchAll(PDO::FETCH_ASSOC);
+$sellRows = $stmtSell->fetchAll(PDO::FETCH_ASSOC);
+
+// function to apply color to high values
+function zScoreClass(float $z): string
+{
+    if ($z <= -2.0) return 'signal-strong-buy';
+    if ($z >=  2.0) return 'signal-strong-sell';
+    return '';
+}
+
+
+
 ?>
 
 <section>
-  <h2>Watchlist Overview</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Symbol</th>
-        <th>Notes</th>
-        <th>Added</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach($items as $item): ?>
-        <tr>
-          <td><?= htmlspecialchars($item['symbol']) ?></td>
-          <td><?= htmlspecialchars($item['notes']) ?></td>
-          <td><?= htmlspecialchars($item['created_at']) ?></td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
+  <h2>Overview</h2>
+
 </section>
+
+<div class="signals-grid">
+
+  <section class="signals buy">
+    <h2>📈 Buy Candidates</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th class="num">Z</th>
+          <th>Watchlists</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($buyRows as $row): ?>
+          <tr>
+            <td><?= htmlspecialchars($row['symbol']) ?></td>
+            <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
+              <?= number_format($row['z_score'], 2) ?>
+            </td>
+            <td><?= $row['watchlists_html'] ?: '—' ?></td>
+            <td><?= htmlspecialchars($row['as_of_date']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="signals sell">
+    <h2>📉 Sell Candidates</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th class="num">Z</th>
+          <th>Watchlists</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($sellRows as $row): ?>
+          <tr>
+            <td><?= htmlspecialchars($row['symbol']) ?></td>
+            <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
+              <?= number_format($row['z_score'], 2) ?>
+            </td>
+            <td><?= $row['watchlists_html'] ?: '—' ?></td>
+            <td><?= htmlspecialchars($row['as_of_date']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </section>
+
+</div>
 
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
