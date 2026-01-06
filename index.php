@@ -21,7 +21,7 @@ $sqlBuy = "
         ls.as_of_date,
         GROUP_CONCAT(
           CONCAT(
-            '<a href=''watchlists.php?id=',
+            '<a href=''watchlists.php?watchlist_id=',
             w.watch_list_id,
             '''>',
             w.name,
@@ -51,7 +51,7 @@ $sqlSell = "
         ls.as_of_date,
         GROUP_CONCAT(
           CONCAT(
-            '<a href=''watchlists.php?id=',
+            '<a href=''watchlists.php?watchlist_id=',
             w.watch_list_id,
             '''>',
             w.name,
@@ -102,7 +102,7 @@ function zScoreClass(float $z): string
 
 <div class="signals-grid">
 
-  <section class="signals buy">
+  <section class="signals buy table-card">
     <h2>📈 Buy Candidates</h2>
 
     <table>
@@ -121,7 +121,7 @@ function zScoreClass(float $z): string
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
             </td>
-            <td><?= $row['watchlists_html'] ?: '—' ?></td>
+            <td class="fs-7"><?= $row['watchlists_html'] ?: '—' ?></td>
             <td><?= htmlspecialchars($row['as_of_date']) ?></td>
           </tr>
         <?php endforeach; ?>
@@ -129,7 +129,7 @@ function zScoreClass(float $z): string
     </table>
   </section>
 
-  <section class="signals sell">
+  <section class="signals sell table-card">
     <h2>📉 Sell Candidates</h2>
 
     <table>

@@ -6,8 +6,11 @@
 
   <title>Stock Screener</title>
 
+  <!-- Bootstrap CSS 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+-->
   <!-- Bootstrap Icons -->
-  <link rel="stylesheet"
+    <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <link rel="stylesheet" href="/assets/styles.css">
@@ -18,9 +21,11 @@
 <header class="site-header">
   <div class="container">
     <div class="brand">
-      <div class="logo">
-        <i class="bi bi-graph-up-arrow"></i>
-      </div>
+      <a href="/index.php">
+        <div class="logo">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+      </a>
       <div class="title">
         <div class="main-title">Stock Screener</div>
         <div class="subtitle">Personal Portfolio Tracker</div>
