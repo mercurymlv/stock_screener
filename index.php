@@ -121,7 +121,7 @@ function zScoreClass(float $z): string
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
             </td>
-            <td class="fs-7"><?= $row['watchlists_html'] ?: '—' ?></td>
+            <td class="wl"><?= $row['watchlists_html'] ?: '—' ?></td>
             <td><?= htmlspecialchars($row['as_of_date']) ?></td>
           </tr>
         <?php endforeach; ?>
@@ -148,7 +148,7 @@ function zScoreClass(float $z): string
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
             </td>
-            <td><?= $row['watchlists_html'] ?: '—' ?></td>
+            <td class="wl">  <?= $row['watchlists_html'] ?: '—' ?></td>
             <td><?= htmlspecialchars($row['as_of_date']) ?></td>
           </tr>
         <?php endforeach; ?>

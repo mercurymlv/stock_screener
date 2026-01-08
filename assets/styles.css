@@ -80,7 +80,7 @@ body {
 
 .nav a {
   text-decoration: none;
-  color: #2e7d32;
+  color: #2563eb;
   font-weight: 500;
 }
 
@@ -190,6 +190,7 @@ th {
   margin-top: 0;
 }
 
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -211,6 +212,11 @@ td.num {
     text-align: right;
     white-space: nowrap;
 }
+
+td.wl {
+  font-size: 0.75rem;
+}
+
 
 /* Signal strength */
 .signal-strong-buy {
