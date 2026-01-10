@@ -6,9 +6,9 @@
 
   <title>Stock Screener</title>
 
-  <!-- Bootstrap CSS 
+  <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
--->
+
   <!-- Bootstrap Icons -->
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -21,7 +21,7 @@
 <header class="site-header">
   <div class="container">
     <div class="brand">
-      <a href="/index.php">
+      <a href="index.php">
         <div class="logo">
           <i class="bi bi-graph-up-arrow"></i>
         </div>
@@ -37,9 +37,9 @@
     </div>
 
      <nav id="main-nav" class="nav">
-      <a href="/index.php"><i class="bi bi-columns-gap"></i> Overview</a>
-      <a href="/watchlists.php"><i class="bi bi-list-stars"></i> Watchlists</a>
-      <a href="/fundamentals.php"><i class="bi bi-bar-chart-line"></i> Fundamentals</a>
+      <a href="index.php"><i class="bi bi-columns-gap"></i> Overview</a>
+      <a href="watchlists.php"><i class="bi bi-list-stars"></i> Watchlists</a>
+      <a href="fundamentals.php"><i class="bi bi-bar-chart-line"></i> Fundamentals</a>
     </nav>
   </div>
 </header>

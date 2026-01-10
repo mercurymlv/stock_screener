@@ -17,6 +17,7 @@ $indicator = 'z_score_20';
 $sqlBuy = "
     SELECT
         ls.symbol,
+        t.name,
         ls.value AS z_score,
         ls.as_of_date,
         GROUP_CONCAT(
@@ -35,9 +36,12 @@ $sqlBuy = "
       ON wi.symbol = ls.symbol
     LEFT JOIN watchlists w
       ON w.watch_list_id = wi.watch_list_id
+    LEFT JOIN tickers t
+      ON t.symbol = ls.symbol
     WHERE ls.indicator = :indicator
     GROUP BY
         ls.symbol,
+        t.name,
         ls.value,
         ls.as_of_date
     ORDER BY ls.value ASC
@@ -47,6 +51,7 @@ $sqlBuy = "
 $sqlSell = "
     SELECT
         ls.symbol,
+        t.name,
         ls.value AS z_score,
         ls.as_of_date,
         GROUP_CONCAT(
@@ -65,9 +70,12 @@ $sqlSell = "
       ON wi.symbol = ls.symbol
     LEFT JOIN watchlists w
       ON w.watch_list_id = wi.watch_list_id
+    LEFT JOIN tickers t
+      ON t.symbol = ls.symbol
     WHERE ls.indicator = :indicator
     GROUP BY
         ls.symbol,
+        t.name,
         ls.value,
         ls.as_of_date
     ORDER BY ls.value DESC
@@ -103,26 +111,28 @@ function zScoreClass(float $z): string
 <div class="signals-grid">
 
   <section class="signals buy table-card">
-    <h2>📈 Buy Candidates</h2>
+    <h3>📈 Buy Candidates</h3>
 
     <table>
       <thead>
         <tr>
           <th>Symbol</th>
+          <th>Name</th>
           <th class="num">Z</th>
           <th>Watchlists</th>
-          <th>Date</th>
+          <th>Yahoo!</th>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($buyRows as $row): ?>
           <tr>
             <td><?= htmlspecialchars($row['symbol']) ?></td>
+            <td><?= htmlspecialchars($row['name']) ?></td>
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
             </td>
             <td class="wl"><?= $row['watchlists_html'] ?: '—' ?></td>
-            <td><?= htmlspecialchars($row['as_of_date']) ?></td>
+            <td class="text-center align-middle"><a href="https://finance.yahoo.com/quote/<?= htmlspecialchars($row['symbol']) ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i></a></td>
           </tr>
         <?php endforeach; ?>
       </tbody>
@@ -130,26 +140,28 @@ function zScoreClass(float $z): string
   </section>
 
   <section class="signals sell table-card">
-    <h2>📉 Sell Candidates</h2>
+    <h3>📉 Sell Candidates</h3>
 
     <table>
       <thead>
         <tr>
           <th>Symbol</th>
+          <th>Name</th>
           <th class="num">Z</th>
           <th>Watchlists</th>
-          <th>Date</th>
+          <th>Yahoo!</th>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($sellRows as $row): ?>
           <tr>
             <td><?= htmlspecialchars($row['symbol']) ?></td>
+            <td><?= htmlspecialchars($row['name']) ?></td>
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
             </td>
             <td class="wl">  <?= $row['watchlists_html'] ?: '—' ?></td>
-            <td><?= htmlspecialchars($row['as_of_date']) ?></td>
+            <td class="text-center align-middle"><a href="https://finance.yahoo.com/quote/<?= htmlspecialchars($row['symbol']) ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i></a></td>
           </tr>
         <?php endforeach; ?>
       </tbody>

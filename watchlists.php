@@ -46,6 +46,10 @@ if (!$selected_watchlist_id) {
     $selected_watchlist_id = $stmt->fetchColumn();
 }
 
+if (!$selected_watchlist_id) {
+    echo "<p><em>No primary watchlist configured.</em></p>";
+}
+
 /**
  * 3. Fetch watchlist items
  */
@@ -53,56 +57,211 @@ $items = [];
 
 if ($selected_watchlist_id) {
     $itemsStmt = $pdo->prepare("
-        SELECT symbol, notes, created_at
-        FROM watchlist_items
-        WHERE watch_list_id = ?
-        ORDER BY symbol
+        SELECT wi.symbol, t.name as company_name, t.sector as sector, t.industry as industry, wi.notes as notes, DATE(wi.created_at) as added_at
+        FROM watchlist_items wi
+        LEFT JOIN tickers t ON wi.symbol = t.symbol
+        WHERE wi.watch_list_id = ?
+        ORDER BY wi.symbol
     ");
     $itemsStmt->execute([$selected_watchlist_id]);
     $items = $itemsStmt->fetchAll();
 }
 ?>
 
-<!-- Watchlist selector -->
-<form method="get">
-  <label for="watchlist_id">Select watchlist:</label>
-  <select name="watchlist_id" id="watchlist_id" onchange="this.form.submit()">
-    <?php foreach ($watchlists as $wl): ?>
-      <option value="<?= $wl['watch_list_id'] ?>"
-        <?= ($wl['watch_list_id'] == $selected_watchlist_id) ? 'selected' : '' ?>>
-        <?= htmlspecialchars($wl['name']) ?>
-      </option>
-    <?php endforeach; ?>
-  </select>
-</form>
+
+
+<?php
+$selected_watchlist_name = '';
+foreach ($watchlists as $wl) {
+    if ($wl['watch_list_id'] == $selected_watchlist_id) {
+        $selected_watchlist_name = $wl['name'];
+        break;
+    }
+}
+?>
 
 <?php if ($selected_watchlist_id): ?>
-<section>
+
+<!-- Watchlist Overview Table -->
+  <section>
   <h2>Watchlist Overview</h2>
 
   <?php if (empty($items)): ?>
     <p>No symbols in this watchlist.</p>
   <?php else: ?>
-    <table>
-      <thead>
-        <tr>
-          <th>Symbol</th>
-          <th>Notes</th>
-          <th>Added</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($items as $item): ?>
+    <div class="table-card">
+      <!-- Watchlist selector -->
+      <form method="get">
+        <label for="watchlist_id">Select watchlist:</label>
+        <select name="watchlist_id" id="watchlist_id" onchange="this.form.submit()">
+          <?php foreach ($watchlists as $wl): ?>
+            <option value="<?= $wl['watch_list_id'] ?>"
+              <?= ($wl['watch_list_id'] == $selected_watchlist_id) ? 'selected' : '' ?>>
+              <?= htmlspecialchars($wl['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </form>
+      <table>
+        <thead>
           <tr>
-            <td><?= htmlspecialchars($item['symbol']) ?></td>
-            <td><?= htmlspecialchars($item['notes']) ?></td>
-            <td><?= htmlspecialchars($item['created_at']) ?></td>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Sector</th>
+            <th>Industry</th>
+            <th>Notes</th>
+            <th>Added</th>
           </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <?php foreach ($items as $item): ?>
+            <tr>
+              <td><?= htmlspecialchars($item['symbol']) ?></td>
+              <td><?= htmlspecialchars($item['company_name']) ?></td>
+              <td><?= htmlspecialchars($item['sector']) ?></td>
+              <td><?= htmlspecialchars($item['industry']) ?></td>
+              <td><?= htmlspecialchars($item['notes']) ?></td>
+              <td><?= htmlspecialchars($item['added_at']) ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
   <?php endif; ?>
 </section>
 <?php endif; ?>
+
+
+<!-- Charts -->
+<!-- Query to get sector distribution -->
+<?php if ($selected_watchlist_id): ?>
+  <?php
+  $sectorStmt = $pdo->prepare("
+      SELECT COALESCE(t.sector, 'Unknown') AS sector, COUNT(*) AS count
+      FROM watchlist_items wi
+      LEFT JOIN tickers t ON wi.symbol = t.symbol
+      WHERE wi.watch_list_id = ?
+      GROUP BY sector
+      ORDER BY count DESC
+  ");
+  $sectorStmt->execute([$selected_watchlist_id]);
+  $sectorData = $sectorStmt->fetchAll(PDO::FETCH_ASSOC);
+
+  $labels = array_column($sectorData, 'sector');
+  $values = array_map('intval', array_column($sectorData, 'count'));
+  ?>
+
+  <!-- Query to get type distribution -->
+   <?php
+   $typeStmt = $pdo->prepare("
+    SELECT COALESCE(t.type, 'Unknown') AS type, COUNT(*) AS count
+    FROM watchlist_items wi
+    LEFT JOIN tickers t ON wi.symbol = t.symbol
+    WHERE wi.watch_list_id = ?
+    GROUP BY type
+    ORDER BY count DESC
+    ");
+    $typeStmt->execute([$selected_watchlist_id]);
+    $typeData = $typeStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $typeLabels = array_column($typeData, 'type');
+    $typeValues = array_map('intval', array_column($typeData, 'count'));
+    ?>
+
+<!-- display the charts -->
+  <section>
+  <h2>Composition</h2>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>By Sector</h3>
+      <canvas id="sectorPieChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>By Type</h3>
+      <canvas id="typePieChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<?php endif; ?>
+
+
+<!-- Scripts to render Charts -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- By Sector -->
+<script>
+const ctx = document.getElementById('sectorPieChart');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: <?= json_encode($labels) ?>,
+      datasets: [{
+        data: <?= json_encode($values) ?>,
+        backgroundColor: [
+          '#4E79A7', '#59A14F', '#E15759', '#F28E2B',
+          '#76B7B2', '#EDC948', '#B07AA1', '#FF9DA7'
+        ],
+      }]
+    },
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = ((value / total) * 100).toFixed(1);
+
+              return `${label}: ${value} (${pct}%)`;
+            }
+          }
+        },
+        legend: { position: 'right' }
+      }
+    }
+  });
+}
+
+// By Type
+const typeCtx = document.getElementById('typePieChart');
+if (typeCtx) {
+  new Chart(typeCtx, {
+    type: 'pie',
+    data: {
+      labels: <?= json_encode($typeLabels) ?>,
+      datasets: [{
+        data: <?= json_encode($typeValues) ?>,
+        backgroundColor: ['#59A14F', '#4E79A7', '#F28E2B', '#E15759']
+      }]
+    },
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = ((value / total) * 100).toFixed(1);
+
+              return `${label}: ${value} (${pct}%)`;
+            }
+          }
+        },
+        legend: { position: 'right' }
+      }
+    }
+  });
+}
+</script>
+
+
+
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
