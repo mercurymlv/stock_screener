@@ -15,10 +15,11 @@ include __DIR__ . '/includes/header.php';
 $indicator = 'z_score_20';
 
 $sqlBuy = "
-    SELECT
+SELECT
         ls.symbol,
         t.name,
         ls.value AS z_score,
+        rsi.value AS RSI,
         ls.as_of_date,
         GROUP_CONCAT(
           CONCAT(
@@ -32,27 +33,31 @@ $sqlBuy = "
           SEPARATOR ', '
         ) AS watchlists_html
     FROM latest_signals_v ls
-    LEFT JOIN watchlist_items wi
-      ON wi.symbol = ls.symbol
+    JOIN watchlist_items wi
+      ON wi.symbol = ls.symbol and wi.active = 1
     LEFT JOIN watchlists w
-      ON w.watch_list_id = wi.watch_list_id
+      ON w.watch_list_id = wi.watch_list_id and w.active = 1
     LEFT JOIN tickers t
       ON t.symbol = ls.symbol
+    LEFT JOIN latest_signals_v rsi
+      ON ls.symbol = rsi.symbol and rsi.indicator = 'rsi_14'
     WHERE ls.indicator = :indicator
     GROUP BY
         ls.symbol,
         t.name,
         ls.value,
+        rsi.value,
         ls.as_of_date
     ORDER BY ls.value ASC
     LIMIT 10;
 ";
 
 $sqlSell = "
-    SELECT
+SELECT
         ls.symbol,
         t.name,
         ls.value AS z_score,
+        rsi.value AS RSI,
         ls.as_of_date,
         GROUP_CONCAT(
           CONCAT(
@@ -66,17 +71,20 @@ $sqlSell = "
           SEPARATOR ', '
         ) AS watchlists_html
     FROM latest_signals_v ls
-    LEFT JOIN watchlist_items wi
-      ON wi.symbol = ls.symbol
+    JOIN watchlist_items wi
+      ON wi.symbol = ls.symbol and wi.active = 1
     LEFT JOIN watchlists w
-      ON w.watch_list_id = wi.watch_list_id
+      ON w.watch_list_id = wi.watch_list_id and w.active = 1
     LEFT JOIN tickers t
       ON t.symbol = ls.symbol
+    LEFT JOIN latest_signals_v rsi
+      ON ls.symbol = rsi.symbol and rsi.indicator = 'rsi_14'
     WHERE ls.indicator = :indicator
     GROUP BY
         ls.symbol,
         t.name,
         ls.value,
+        rsi.value,
         ls.as_of_date
     ORDER BY ls.value DESC
     LIMIT 10;
@@ -99,6 +107,23 @@ function zScoreClass(float $z): string
     return '';
 }
 
+// function to apply color to RSI as complementary signal to zScore
+function rsiClass(float $z, float $rsi): string
+{
+    if ($z <= -1.5) {
+        if ($rsi <= 35.0) return 'signal-agree-buy';
+        if ($rsi >= 60.0) return 'signal-not-agree';
+    }
+
+    if ($z >= 1.5) {
+        if ($rsi >= 65.0) return 'signal-agree-sell';
+        if ($rsi <= 40.0) return 'signal-not-agree';
+    }
+
+    return '';
+}
+
+
 
 
 ?>
@@ -113,12 +138,15 @@ function zScoreClass(float $z): string
   <section class="signals buy table-card">
     <h3>📈 Buy Candidates</h3>
 
+    <!-- here -->
+
     <table>
       <thead>
         <tr>
           <th>Symbol</th>
           <th>Name</th>
           <th class="num">Z</th>
+          <th class="num">RSI</th>
           <th>Watchlists</th>
           <th>Yahoo!</th>
         </tr>
@@ -131,8 +159,11 @@ function zScoreClass(float $z): string
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
             </td>
+            <td class="num <?= rsiClass((float)$row['z_score'], (float)$row['RSI']) ?>">
+              <?= number_format($row['RSI'], 1) ?>
+            </td>
             <td class="wl"><?= $row['watchlists_html'] ?: '—' ?></td>
-            <td class="text-center align-middle"><a href="https://finance.yahoo.com/quote/<?= htmlspecialchars($row['symbol']) ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i></a></td>
+            <td class="text-center align-middle"><a href="https://finance.yahoo.com/quote/<?= htmlspecialchars($row['symbol']) ?>" title="View on Yahoo Finance" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i></a></td>
           </tr>
         <?php endforeach; ?>
       </tbody>
@@ -148,6 +179,7 @@ function zScoreClass(float $z): string
           <th>Symbol</th>
           <th>Name</th>
           <th class="num">Z</th>
+          <th class="num">RSI</th>
           <th>Watchlists</th>
           <th>Yahoo!</th>
         </tr>
@@ -160,7 +192,9 @@ function zScoreClass(float $z): string
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
             </td>
-            <td class="wl">  <?= $row['watchlists_html'] ?: '—' ?></td>
+            <td class="num <?= rsiClass((float)$row['z_score'], (float)$row['RSI']) ?>">
+              <?= number_format($row['RSI'], 1) ?>
+            </td><td class="wl">  <?= $row['watchlists_html'] ?: '—' ?></td>
             <td class="text-center align-middle"><a href="https://finance.yahoo.com/quote/<?= htmlspecialchars($row['symbol']) ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i></a></td>
           </tr>
         <?php endforeach; ?>

@@ -39,7 +39,7 @@
      <nav id="main-nav" class="nav">
       <a href="index.php"><i class="bi bi-columns-gap"></i> Overview</a>
       <a href="watchlists.php"><i class="bi bi-list-stars"></i> Watchlists</a>
-      <a href="fundamentals.php"><i class="bi bi-bar-chart-line"></i> Fundamentals</a>
+      <a href="details.php"><i class="bi bi-bar-chart-line"></i> Details</a>
     </nav>
   </div>
 </header>
