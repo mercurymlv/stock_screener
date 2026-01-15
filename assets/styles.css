@@ -36,6 +36,9 @@ h3 {
   padding-top: 10px;
 }
 
+/* h6 {
+  margin-bottom: 0px;
+} */
 
 
 /* =========================
@@ -143,6 +146,80 @@ table tbody tr:nth-child(odd) {
 table thead th {
   background-color: #f0f0f0;
   font-weight: 600;
+}
+
+/* =========================
+   Cards and Metrics
+========================= */
+
+.stock-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  /* padding: 0.75rem 1rem; */
+  height: 100%;
+}
+
+.stock-card-header {
+  padding: 0.5rem 1rem;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  background: #f5f7fa; /* default fallback */
+}
+
+.stock-card .card-body {
+  padding: 0.75rem 1rem 1rem;
+}
+
+/* .header-valuation {
+  background: linear-gradient(135deg, #b9c6d6, #e3e9f1);
+}
+
+.header-technical {
+  background: linear-gradient(135deg, #b9d6c6, #e3f1ea);
+}
+
+.header-balance {
+  background: linear-gradient(135deg, #c1b6d6, #e9e5f2);
+}
+
+
+.header-growth {
+  background: linear-gradient(135deg, #d0c0a3, #efe8da);
+} */
+
+/* Header colors - Solid and Muted */
+.header-valuation { background-color: #e0f2fe; color: #0369a1; border-left: 4px solid #0ea5e9; }
+.header-technical { background-color: #f0fdf4; color: #15803d; border-left: 4px solid #22c55e; }
+.header-balance   { background-color: #faf5ff; color: #7e22ce; border-left: 4px solid #a855f7; }
+.header-growth    { background-color: #fffbeb; color: #b45309; border-left: 4px solid #f59e0b; }
+
+
+.card-section-title {
+  font-size: 1.1rem;
+  /* letter-spacing: 0.08em; */
+  color: #6c757d;
+  margin-bottom: 1px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.metric-label {
+  color: #555;
+}
+
+.metric-value {
+  font-weight: 600;
+}
+
+.metric-row + .metric-row {
+  border-top: 1px dashed #eee;
 }
 
 
