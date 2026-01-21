@@ -154,7 +154,11 @@ function rsiClass(float $z, float $rsi): string
       <tbody>
         <?php foreach ($buyRows as $row): ?>
           <tr>
-            <td><?= htmlspecialchars($row['symbol']) ?></td>
+            <td>
+              <a href="snapshot.php?symbol=<?= urlencode($row['symbol']) ?>">
+                <?= htmlspecialchars($row['symbol']) ?>
+              </a>
+            </td>
             <td><?= htmlspecialchars($row['name']) ?></td>
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>
@@ -187,7 +191,11 @@ function rsiClass(float $z, float $rsi): string
       <tbody>
         <?php foreach ($sellRows as $row): ?>
           <tr>
-            <td><?= htmlspecialchars($row['symbol']) ?></td>
+            <td>
+              <a href="snapshot.php?symbol=<?= urlencode($row['symbol']) ?>">
+                <?= htmlspecialchars($row['symbol']) ?>
+              </a>
+            </td>
             <td><?= htmlspecialchars($row['name']) ?></td>
             <td class="num <?= zScoreClass((float)$row['z_score']) ?>">
               <?= number_format($row['z_score'], 2) ?>

@@ -24,12 +24,26 @@ include __DIR__ . '/includes/header.php';
 $symbol = $_GET['symbol'] ?? 'ADP';
 
 // Fetch fundamentals + latest signal data
+$symbol = $_GET['symbol'] ?? 'ADP';
+
+// We pull the "latest" value for every indicator we track for this symbol
 $stmt = $pdo->prepare("
-    SELECT t.*, ls.value as z_score, rsi.value as rsi
+    SELECT 
+        t.*,
+        MAX(CASE WHEN ls.indicator = 'z_score_20' THEN ls.value END) as z_score,
+        MAX(CASE WHEN ls.indicator = 'rsi_14' THEN ls.value END) as rsi,
+        MAX(CASE WHEN ls.indicator = 'pe_ratio' THEN ls.value END) as pe_ratio,
+        MAX(CASE WHEN ls.indicator = 'forward_pe' THEN ls.value END) as forward_pe,
+        MAX(CASE WHEN ls.indicator = 'peg_ratio' THEN ls.value END) as peg_ratio,
+        MAX(CASE WHEN ls.indicator = 'div_yield' THEN ls.value END) as div_yield,
+        MAX(CASE WHEN ls.indicator = 'debt_equity' THEN ls.value END) as debt_equity,
+        MAX(CASE WHEN ls.indicator = 'current_ratio' THEN ls.value END) as current_ratio,
+        MAX(CASE WHEN ls.indicator = 'roe' THEN ls.value END) as roe,
+        MAX(CASE WHEN ls.indicator = 'rev_growth' THEN ls.value END) as rev_growth
     FROM tickers t
-    LEFT JOIN latest_signals_v ls ON t.symbol = ls.symbol AND ls.indicator = 'z_score_20'
-    LEFT JOIN latest_signals_v rsi ON t.symbol = rsi.symbol AND rsi.indicator = 'rsi_14'
+    LEFT JOIN latest_signals_v ls ON t.symbol = ls.symbol
     WHERE t.symbol = ?
+    GROUP BY t.symbol
 ");
 
 $stmt->execute([$symbol]);
@@ -59,27 +73,33 @@ $stock = $stmt->fetch();
     <?php else: ?>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><?php echo $stock['symbol']; ?> <small class="text-muted"><?php echo $stock['name']; ?></small></h2>
+        <h2><?php echo $stock['symbol']; ?> : <small class="text-muted"><?php echo $stock['name']; ?></small></h2>
     </div>
 
     <div class="row g-3">
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-valuation">
-                    <h6 class="card-section-title">Valuation</h6>
+                    <h6 class="card-section-title">📊 Valuation</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
-                    <span class="metric-label">P/E Ratio</span>
-                    <span class="metric-value">
-                        <?= number_format($stock['pe_ratio'], 2); ?>
-                    </span>
+                        <span class="metric-label">P/E Ratio</span>
+                        <span class="metric-value">
+                            <?= number_format($stock['pe_ratio'], 2); ?>
+                        </span>
                     </div>
                     <div class="metric-row">
-                    <span class="metric-label">PEG Ratio</span>
-                    <span class="metric-value">
-                        <?= number_format($stock['peg_ratio'], 2); ?>
-                    </span>
+                        <span class="metric-label">Forward P/E</span>
+                        <span class="metric-value">
+                            <?= number_format($stock['forward_pe'], 2); ?>
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">PEG Ratio</span>
+                        <span class="metric-value">
+                            <?= number_format($stock['peg_ratio'], 2); ?>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -88,7 +108,7 @@ $stock = $stmt->fetch();
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-technical">
-                    <h6 class="card-section-title">Technical Timing</h6>
+                    <h6 class="card-section-title"><i class="bi bi-stopwatch"></i> Technical Timing</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
@@ -106,16 +126,20 @@ $stock = $stmt->fetch();
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-growth">
-                    <h6 class="card-section-title">Yield & Growth</h6>
+                    <h6 class="card-section-title">🌱 Yield & Growth</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
                         <span class="metric-label">Div Yield:</span>
-                        <span class="metric-value"><?php echo $stock['div_yield']; ?>%</span>
+                        <span class="metric-value"><?php echo number_format($stock['div_yield'], 2); ?>%</span>
                     </div>
                     <div class="metric-row">
-                        <span class="metric-label">EPS Growth:</span>
-                        <span class="metric-value"><?php echo $stock['eps_growth']; ?>%</span>
+                        <span class="metric-label">Revenue Growth:</span>
+                        <span class="metric-value"><?php echo number_format($stock['rev_growth'], 2); ?>%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">ROE:</span>
+                        <span class="metric-value"><?php echo number_format($stock['roe'], 2); ?>%</span>
                     </div>
                 </div>
             </div>
@@ -124,16 +148,16 @@ $stock = $stmt->fetch();
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-balance">
-                    <h6 class="card-section-title">Balance Sheet</h6>
+                    <h6 class="card-section-title"><i class="bi bi-currency-dollar"></i> Balance Sheet</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
                         <span class="metric-label">Debt/Equity:</span>
-                        <span class="metric-value"><?php echo $stock['debt_equity']; ?></span>
+                        <span class="metric-value"><?php echo number_format($stock['debt_equity'], 2); ?></span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Current Ratio:</span>
-                        <span class="metric-value"><?php echo $stock['current_ratio']; ?></span>
+                        <span class="metric-value"><?php echo number_format($stock['current_ratio'], 2); ?></span>
                     </div>
                 </div>
             </div>

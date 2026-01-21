@@ -191,7 +191,11 @@ foreach ($watchlists as $wl) {
         <tbody>
           <?php foreach ($items as $item): ?>
             <tr>
-              <td><?= htmlspecialchars($item['symbol']) ?></td>
+              <td>
+                <a href="snapshot.php?symbol=<?= urlencode($item['symbol']) ?>">
+                  <?= htmlspecialchars($item['symbol']) ?>
+                </a>
+              </td>
               <td><?= htmlspecialchars($item['company_name']) ?></td>
               <td><?= htmlspecialchars($item['sector']) ?></td>
               <td><?= htmlspecialchars($item['industry']) ?></td>

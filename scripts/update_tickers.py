@@ -68,6 +68,10 @@ def fetch_ticker_info(symbol):
 
         ticker_type = "ETF" if info.get("quoteType") == "ETF" else "STOCK"
 
+        # Use sector if available, otherwise fall back to type
+        sector = info.get("sector") or ticker_type
+        industry = info.get("industry") or ticker_type
+
         return {
             "symbol": symbol,
             "name": name,
