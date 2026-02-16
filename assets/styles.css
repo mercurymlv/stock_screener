@@ -399,6 +399,25 @@ td.wl {
 }
 
 
+/* added for the composite price table */
+.signal-buy {
+    color: #198754;   /* soft green */
+}
+
+.signal-sell {
+    color: #dc3545;   /* soft red */
+}
+
+
+.signal-extreme {
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+
+
+
+
 /* Links */
 td a {
     color: #0366d6;

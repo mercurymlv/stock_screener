@@ -73,14 +73,14 @@ $stock = $stmt->fetch();
     <?php else: ?>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><?php echo $stock['symbol']; ?> : <small class="text-muted"><?php echo $stock['name']; ?></small></h2>
+        <h2><?php echo $stock['symbol']; ?> <small class="text-muted"><?php echo $stock['name']; ?></small></h2>
     </div>
 
     <div class="row g-3">
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-valuation">
-                    <h6 class="card-section-title">📊 Valuation</h6>
+                    <h6 class="card-section-title">Valuation</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
@@ -108,7 +108,7 @@ $stock = $stmt->fetch();
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-technical">
-                    <h6 class="card-section-title"><i class="bi bi-stopwatch"></i> Technical Timing</h6>
+                    <h6 class="card-section-title">Technical Timing</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
@@ -126,7 +126,7 @@ $stock = $stmt->fetch();
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-growth">
-                    <h6 class="card-section-title">🌱 Yield & Growth</h6>
+                    <h6 class="card-section-title">Yield & Growth</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
@@ -148,7 +148,7 @@ $stock = $stmt->fetch();
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="stock-card">
                 <div class="stock-card-header header-balance">
-                    <h6 class="card-section-title"><i class="bi bi-currency-dollar"></i> Balance Sheet</h6>
+                    <h6 class="card-section-title">Balance Sheet</h6>
                 </div>
                 <div class="card-body">
                     <div class="metric-row">
