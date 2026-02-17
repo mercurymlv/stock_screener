@@ -148,6 +148,25 @@ table thead th {
   font-weight: 600;
 }
 
+
+/* News stuff */
+#top20-news .news-item {
+    display: none;
+    margin-bottom: 1em;
+}
+.news-source {
+    font-size: 0.85em;
+    color: #666;
+    margin-left: 0.5em;
+}
+#load-more-btn {
+    display: block;
+    margin: 1em auto;
+    padding: 0.5em 1em;
+    cursor: pointer;
+}
+
+
 /* =========================
    Cards and Metrics
 ========================= */

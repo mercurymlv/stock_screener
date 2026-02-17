@@ -91,6 +91,15 @@ SELECT
 ";
 
 $sqlComposite = "
+WITH top_20 AS (
+    SELECT
+        symbol,
+        composite_price
+    FROM v_composite_price
+    ORDER BY ABS(composite_price) DESC
+    LIMIT 20
+)
+
 SELECT
     cp.symbol,
     t.name,
@@ -99,6 +108,7 @@ SELECT
     cp.persistence,
     cp.volume_z_20,
     cp.rsi_14,
+
     GROUP_CONCAT(
         CONCAT(
             '<a href=''watchlists.php?watchlist_id=',
@@ -111,12 +121,10 @@ SELECT
         SEPARATOR ', '
     ) AS watchlists_html
 
-FROM (
-    SELECT *
-    FROM v_composite_price
-    ORDER BY ABS(composite_price) DESC
-    LIMIT 20
-) cp
+FROM top_20 t20
+
+JOIN v_composite_price cp
+    ON cp.symbol = t20.symbol
 
 JOIN watchlist_items wi
     ON wi.symbol = cp.symbol
@@ -129,15 +137,12 @@ LEFT JOIN watchlists w
 LEFT JOIN tickers t
     ON t.symbol = cp.symbol
 
-GROUP BY
-    cp.symbol,
-    t.name,
-    cp.z_score_20,
-    cp.composite_price,
-    cp.persistence,
-    cp.volume_z_20,
-    cp.rsi_14;
+GROUP BY cp.symbol
+
+ORDER BY ABS(cp.composite_price) DESC;
 ";
+
+
 
 $stmtBuy  = $pdo->prepare($sqlBuy);
 $stmtSell = $pdo->prepare($sqlSell);
@@ -150,6 +155,20 @@ $sellRows = $stmtSell->fetchAll(PDO::FETCH_ASSOC);
 
 $stmtComposite = $pdo->query($sqlComposite);
 $compRows = $stmtComposite->fetchAll(PDO::FETCH_ASSOC);
+
+// Load the news for the top 20 stocks
+$symbolList = implode("','", array_map('addslashes', array_column($compRows, 'symbol')));
+$sqlNews = "
+    SELECT *
+    FROM news
+    WHERE symbol IN ('$symbolList')
+    ORDER BY published_at DESC
+    LIMIT 120
+";
+
+$stmtNews = $pdo->query($sqlNews);
+$newsRows = $stmtNews->fetchAll(PDO::FETCH_ASSOC);
+
 
 // function to apply color to high values
 function zScoreClass(float $z): string
@@ -342,6 +361,54 @@ function componentExtreme(float $v): string
     </tbody>
   </table>
 </section>
+
+
+<section class="table-card mt-4" id="top20-news">
+    <h3>📰 News</h3>
+
+    <div id="news-container">
+        <?php foreach ($newsRows as $item): ?>
+        <article class="news-item">
+            <header>
+                <a href="<?= htmlspecialchars($item['url']) ?>" target="_blank" rel="noopener noreferrer">
+                    <?= htmlspecialchars($item['headline']) ?>
+                </a>
+                <span class="news-source"><?= htmlspecialchars($item['source']) ?></span>
+                <time datetime="<?= date('c', strtotime($item['published_at'])) ?>">
+                    <?= date('M d, Y', strtotime($item['published_at'])) ?>
+                </time>
+            </header>
+        </article>
+        <?php endforeach; ?>
+    </div>
+
+    <button id="load-more-btn">Load more</button>
+</section>
+
+<script>
+    const ITEMS_TO_SHOW = 30;
+    let shownCount = 0;
+
+    const newsItems = document.querySelectorAll("#news-container .news-item");
+    const loadBtn = document.getElementById("load-more-btn");
+
+    function showNextBatch() {
+        const nextCount = Math.min(shownCount + ITEMS_TO_SHOW, newsItems.length);
+        for (let i = shownCount; i < nextCount; i++) {
+            newsItems[i].style.display = "block";
+        }
+        shownCount = nextCount;
+
+        if (shownCount >= newsItems.length) {
+            loadBtn.style.display = "none";
+        }
+    }
+
+    // Initial display
+    showNextBatch();
+
+    loadBtn.addEventListener("click", showNextBatch);
+</script>
 
 
 
